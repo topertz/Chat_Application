@@ -83,7 +83,10 @@ namespace ChatClient
                     "http://localhost:5090/api/users/login",
                     new { Username = _username }
                 );
-                await _connection.StartAsync();
+                if (_connection.State == HubConnectionState.Disconnected)
+                {
+                    await _connection.StartAsync();
+                }
                 await _connection.InvokeAsync("Register", _username);
                 await LoadUsers();
 
