@@ -20,7 +20,7 @@ namespace ChatClient
     {
         private HubConnection _connection;
         private string _username = "";
-        private string _selectedUser;
+        private string? _selectedUser;
         public MainWindow()
         {
             InitializeComponent();
