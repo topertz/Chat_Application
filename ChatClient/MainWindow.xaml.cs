@@ -43,7 +43,7 @@ namespace ChatClient
             {
                 Dispatcher.Invoke(() =>
                 {
-                    MessagesList.Items.Add(message);
+                    MessagesList.Items.Add($"[{time}] {user}: {message}");
                 });
             });
         }
