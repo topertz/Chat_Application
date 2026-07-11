@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using ChatAPI.Models;
+using ChatClient.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -13,8 +16,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.IO;
-using ChatAPI.Models;
 
 namespace ChatClient
 {
@@ -24,6 +25,7 @@ namespace ChatClient
         private string _username = "";
         private string? _selectedUser;
         private string? _selectedFile;
+        private Dictionary<string, ChatConversation> _conversations = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -41,21 +43,36 @@ namespace ChatClient
             })
             .WithAutomaticReconnect()
             .Build();
-            _connection.On <string, string, string>("ReceiveMessage",
-                (user, message, time) => 
+            _connection.On<string, string, string>("ReceiveMessage",
+            (user, message, time) =>
             {
                 Dispatcher.Invoke(() =>
                 {
-                    MessagesList.Items.Add(new ChatMessage
+                    if (!_conversations.ContainsKey(user))
                     {
-                        User = user,
-                        Text = message,
-                        Time = time,
-                        IsMine = user == _username
-                    });
-                    MessagesList.ScrollIntoView(
-                        MessagesList.Items[MessagesList.Items.Count - 1]
-                    );
+                        _conversations[user] = new ChatConversation
+                        {
+                            Username = user
+                        };
+                    }
+
+                    _conversations[user].Messages.Add(
+                        new ChatMessage
+                        {
+                            User = user,
+                            Text = message,
+                            Time = time,
+                            IsMine = user == _username
+                        });
+
+                    if (_selectedUser == user)
+                    {
+                        MessagesList.ItemsSource =
+                            _conversations[user].Messages;
+
+                        MessagesList.ScrollIntoView(
+                            MessagesList.Items[MessagesList.Items.Count - 1]);
+                    }
                 });
             });
         }
@@ -82,6 +99,20 @@ namespace ChatClient
             if (UsersList.SelectedItem is UserDto user)
             {
                 _selectedUser = user.Username;
+
+                ChatTitle.Text = user.Username;
+
+                if (!_conversations.ContainsKey(user.Username))
+                {
+                    _conversations[user.Username] = new ChatConversation
+                    {
+                        Username = user.Username
+                    };
+                }
+
+
+                MessagesList.ItemsSource =
+                    _conversations[user.Username].Messages;
             }
         }
 

@@ -21,7 +21,7 @@ public class ChatHub : Hub
         return Task.CompletedTask;
     }
 
-    public async Task SendMessage(string fromUser, string toUser, string text)
+    public async Task SendMessage(string fromUser, string toUser, string text, string? file)
     {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == fromUser);
 
@@ -36,15 +36,22 @@ public class ChatHub : Hub
         {
             Text = text,
             UserId = user.Id,
-            SentAt = DateTime.UtcNow
+            SentAt = DateTime.UtcNow,
+            FileUrl = file
         };
 
         _context.Messages.Add(message);
         await _context.SaveChangesAsync();
 
-        await Clients.All.SendAsync("ReceiveMessage",
-            fromUser,
-            text,
-            message.SentAt.ToString("HH:mm"));
+        if (_users.TryGetValue(toUser, out var connectionId))
+        {
+            await Clients.Client(connectionId)
+                .SendAsync(
+                    "ReceiveMessage",
+                    fromUser,
+                    text,
+                    message.SentAt.ToString("HH:mm")
+                );
+        }
     }
 }

@@ -49,11 +49,19 @@ app.UseAuthorization();
 
 app.UseStaticFiles();
 
+var uploadPath = Path.Combine(
+    builder.Environment.ContentRootPath,
+    "Uploads"
+);
+
+if (!Directory.Exists(uploadPath))
+{
+    Directory.CreateDirectory(uploadPath);
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "Uploads")),
-
+    FileProvider = new PhysicalFileProvider(uploadPath),
     RequestPath = "/Uploads"
 });
 
