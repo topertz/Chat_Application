@@ -38,17 +38,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/LoginDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/LoginDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/LoginDto"
               }
             }
           }
@@ -102,51 +102,15 @@
   },
   "components": {
     "schemas": {
-      "Message": {
+      "LoginDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "text": {
-            "type": "string",
-            "nullable": true
-          },
-          "sentAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "userId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "additionalProperties": false
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
           "username": {
             "type": "string",
             "nullable": true
           },
-          "createdAt": {
+          "password": {
             "type": "string",
-            "format": "date-time"
-          },
-          "messages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Message"
-            },
             "nullable": true
           }
         },

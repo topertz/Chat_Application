@@ -56,8 +56,14 @@
               "version": "[8.0.26, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
+              "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.26, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.26, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",

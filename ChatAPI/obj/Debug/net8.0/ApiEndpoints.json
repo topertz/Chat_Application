@@ -29,7 +29,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "ChatAPI.Models.User",
+        "Type": "ChatAPI.Models.LoginDto",
         "IsRequired": true
       }
     ],

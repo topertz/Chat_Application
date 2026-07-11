@@ -72,7 +72,6 @@ namespace ChatClient
 
             UsersList.ItemsSource = null;
             UsersList.ItemsSource = users;
-            UsersList.DisplayMemberPath = "Username";
         }
 
         private void UsersList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -95,10 +94,20 @@ namespace ChatClient
             try
             {
                 using var client = new HttpClient();
-                await client.PostAsJsonAsync(
+                var response = await client.PostAsJsonAsync(
                     "http://localhost:5090/api/users/login",
-                    new { Username = _username }
+                    new
+                    {
+                        Username = _username,
+                        Password = PasswordBox.Password
+                    }
                 );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Wrong username or password!");
+                    return;
+                }
                 if (_connection.State == HubConnectionState.Disconnected)
                 {
                     await _connection.StartAsync();

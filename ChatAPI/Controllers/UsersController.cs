@@ -30,14 +30,26 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] User dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var user = _context.Users.FirstOrDefault(x => x.Username ==  dto.Username);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == dto.Username);
         if (user == null)
         {
-            user = new User { Username = dto.Username };
+            user = new User
+            {
+                Username = dto.Username,
+                Password = dto.Password
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+        if (user.Password != dto.Password)
+        {
+            return Unauthorized("Wrong password");
         }
         return Ok(user);
     }
