@@ -43,8 +43,8 @@ namespace ChatClient
             })
             .WithAutomaticReconnect()
             .Build();
-            _connection.On<string, string, string>("ReceiveMessage",
-            (user, message, time) =>
+            _connection.On<string, string, string, string?>("ReceiveMessage",
+            (user, message, time, file) =>
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -62,7 +62,8 @@ namespace ChatClient
                             User = user,
                             Text = message,
                             Time = time,
-                            IsMine = user == _username
+                            IsMine = user == _username,
+                            FileUrl = file
                         });
 
                     if (_selectedUser == user)
@@ -81,6 +82,27 @@ namespace ChatClient
             if (e.Key == Key.Enter)
             {
                 Send_Click(sender, e);
+            }
+        }
+
+        private void File_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBlock tb &&
+                !string.IsNullOrWhiteSpace(tb.Text))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = tb.Text,
+                            UseShellExecute = true
+                        });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
@@ -196,7 +218,9 @@ namespace ChatClient
 
                 using var content = new MultipartFormDataContent();
 
-                var fileContent = new StreamContent(File.OpenRead(_selectedFile));
+                using var stream = File.OpenRead(_selectedFile);
+
+                var fileContent = new StreamContent(stream);
 
                 content.Add(fileContent, "file", Path.GetFileName(_selectedFile));
 
@@ -220,7 +244,8 @@ namespace ChatClient
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(MessageInput.Text))
+            if (string.IsNullOrWhiteSpace(MessageInput.Text) &&
+                string.IsNullOrWhiteSpace(uploadedFile))
             {
                 return;
             }

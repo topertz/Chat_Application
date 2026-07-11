@@ -193,6 +193,11 @@
                                             <!-- Üzenet -->
                                             <TextBlock Text="{Binding Text}"
                                             TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding FileUrl}"
+                                            TextWrapping="Wrap"
+                                            Foreground="LightBlue"
+                                            Cursor="Hand"
+                                            MouseDown="File_Click"/>
                                             <!-- Idő -->
                                             <TextBlock Text="{Binding Time}"
                                            FontSize="10"
