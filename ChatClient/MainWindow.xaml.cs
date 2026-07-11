@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Win32;
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,8 +13,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ChatClient.Models;
+using System.IO;
+using ChatAPI.Models;
 
 namespace ChatClient
 {
@@ -21,6 +23,7 @@ namespace ChatClient
         private HubConnection _connection;
         private string _username = "";
         private string? _selectedUser;
+        private string? _selectedFile;
         public MainWindow()
         {
             InitializeComponent();
@@ -81,8 +84,36 @@ namespace ChatClient
                 _selectedUser = user.Username;
             }
         }
+
+        private bool ValidatePassword(string password)
+        {
+            return Regex.IsMatch(
+                password,
+                @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$"
+            );
+        }
+
+        private void Attach_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+
+            if (dialog.ShowDialog() == true)
+            {
+                _selectedFile = dialog.FileName;
+
+                MessageBox.Show($"Selected:\n{_selectedFile}");
+            }
+        }
         private async void Login_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidatePassword(PasswordBox.Password))
+            {
+                MessageBox.Show(
+                    "Password must contain at least 8 characters, uppercase, lowercase, number and special character!"
+                );
+                return;
+            }
+
             _username = UsernameBox.Text;
 
             if (string.IsNullOrWhiteSpace(_username))
@@ -105,7 +136,8 @@ namespace ChatClient
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Wrong username or password!");
+                    var error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show(error);
                     return;
                 }
                 if (_connection.State == HubConnectionState.Disconnected)
@@ -125,6 +157,26 @@ namespace ChatClient
 
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
+            string? uploadedFile = null;
+
+            if (!string.IsNullOrEmpty(_selectedFile))
+            {
+                using var client = new HttpClient();
+
+                using var content = new MultipartFormDataContent();
+
+                var fileContent = new StreamContent(File.OpenRead(_selectedFile));
+
+                content.Add(fileContent, "file", Path.GetFileName(_selectedFile));
+
+                var response = await client.PostAsync(
+                    "http://localhost:5090/api/files/upload",
+                    content);
+
+                uploadedFile = await response.Content.ReadAsStringAsync();
+
+                _selectedFile = null;
+            }
             if (_connection.State != HubConnectionState.Connected)
             {
                 MessageBox.Show("No connection!");
@@ -146,7 +198,8 @@ namespace ChatClient
                 "SendMessage",
                 _username,
                 _selectedUser,
-                MessageInput.Text
+                MessageInput.Text,
+                uploadedFile
             );
 
             MessageInput.Text = "";

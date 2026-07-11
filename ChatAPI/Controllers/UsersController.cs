@@ -2,6 +2,7 @@ using ChatAPI.Data;
 using ChatAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ChatAPI.Validators;
 
 namespace ChatAPI.Controllers;
 
@@ -32,6 +33,13 @@ public class UsersController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
+        if (!PasswordValidator.IsValid(dto.Password))
+        {
+            return BadRequest(
+                "Password must contain at least 8 characters, uppercase, lowercase, number and special character."
+            );
+        }
+
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Username == dto.Username);
         if (user == null)
@@ -39,7 +47,7 @@ public class UsersController : ControllerBase
             user = new User
             {
                 Username = dto.Username,
-                Password = dto.Password
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
             _context.Users.Add(user);
@@ -47,7 +55,7 @@ public class UsersController : ControllerBase
 
             return Ok(user);
         }
-        if (user.Password != dto.Password)
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
         {
             return Unauthorized("Wrong password");
         }

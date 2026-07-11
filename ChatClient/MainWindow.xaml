@@ -62,15 +62,32 @@
         <!-- HEADER -->
         <Border Grid.Row="0" Background="#2B2D31" CornerRadius="10" Padding="15" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="💬 Chat Client" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
-                <TextBox x:Name="UsernameBox"
-                 Width="180"
-                 Margin="30,0,0,0"/>
-                <PasswordBox x:Name="PasswordBox"
-                 Width="180"
-                 Margin="10,0,0,0"/>
+                <TextBlock Text="💬 Chat Client"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   VerticalAlignment="Center"
+                   Margin="0,0,30,0"/>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Username"
+                    FontSize="12"
+                    Margin="0,0,0,5"/>
+                    <TextBox x:Name="UsernameBox"
+                     Width="180"
+                     Height="35"
+                     Margin="0,0,0,5"/>
+                    <TextBlock Text="Password"
+                    FontSize="12"
+                    Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="PasswordBox"
+                         Width="180"
+                         Height="35"
+                         Margin="0,0,0,5"/>
+                </StackPanel>
                 <Button Content="Login"
                 Width="100"
+                Height="35"
+                VerticalAlignment="Center"
+                Margin="10,0,0,0"
                 Click="Login_Click"/>
             </StackPanel>
         </Border>
@@ -192,17 +209,20 @@
         <!-- MESSAGE INPUT -->
         <Border Grid.Row="2" Background="#2B2D31" CornerRadius="10" Margin="0,10,0,0" Padding="10">
             <Grid>
-                <TextBox
-        x:Name="MessageInput"
-        Height="40"
-        Margin="0,0,50,0"
-        KeyDown="MessageInput_KeyDown"/>
-                <Button
-        Width="40"
-        Height="40"
-        HorizontalAlignment="Right"
-        Content="➤"
-        Click="Send_Click"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+            Content="📎"
+            Click="Attach_Click"/>
+                <TextBox Grid.Column="1"
+             x:Name="MessageInput"
+             KeyDown="MessageInput_KeyDown"/>
+                <Button Grid.Column="2"
+            Content="➤"
+            Click="Send_Click"/>
             </Grid>
         </Border>
     </Grid>

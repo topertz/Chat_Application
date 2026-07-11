@@ -1,5 +1,21 @@
 [
   {
+    "ContainingType": "ChatAPI.Controllers.FilesController",
+    "Method": "Upload",
+    "RelativePath": "api/files/upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ChatAPI.Controllers.MessagesController",
     "Method": "GetMessages",
     "RelativePath": "api/messages",
