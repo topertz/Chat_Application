@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "x8Cq4T5nrXs=",
+  "dgSpecHash": "5rxRg9f5qgM=",
   "success": true,
-  "projectFilePath": "D:\\ChatAPI\\ChatAPI.csproj",
+  "projectFilePath": "D:\\Chat_Application\\ChatAPI\\ChatAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mark\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Mark\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",

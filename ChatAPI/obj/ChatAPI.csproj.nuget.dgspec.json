@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ChatAPI\\ChatAPI.csproj": {}
+    "D:\\Chat_Application\\ChatAPI\\ChatAPI.csproj": {}
   },
   "projects": {
-    "D:\\ChatAPI\\ChatAPI.csproj": {
+    "D:\\Chat_Application\\ChatAPI\\ChatAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ChatAPI\\ChatAPI.csproj",
+        "projectUniqueName": "D:\\Chat_Application\\ChatAPI\\ChatAPI.csproj",
         "projectName": "ChatAPI",
-        "projectPath": "D:\\ChatAPI\\ChatAPI.csproj",
+        "projectPath": "D:\\Chat_Application\\ChatAPI\\ChatAPI.csproj",
         "packagesPath": "C:\\Users\\Mark\\.nuget\\packages\\",
-        "outputPath": "D:\\ChatAPI\\obj\\",
+        "outputPath": "D:\\Chat_Application\\ChatAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

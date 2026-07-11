@@ -43,9 +43,25 @@ namespace ChatClient
             {
                 Dispatcher.Invoke(() =>
                 {
-                    MessagesList.Items.Add($"[{time}] {user}: {message}");
+                    MessagesList.Items.Add(new ChatMessage
+                    {
+                        User = user,
+                        Text = message,
+                        Time = time,
+                        IsMine = user == _username
+                    });
+                    MessagesList.ScrollIntoView(
+                        MessagesList.Items[MessagesList.Items.Count - 1]
+                    );
                 });
             });
+        }
+        private void MessageInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Send_Click(sender, e);
+            }
         }
 
         private async Task LoadUsers()
