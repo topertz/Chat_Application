@@ -3,6 +3,7 @@ using ChatClient.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -106,6 +107,19 @@ namespace ChatClient
             }
         }
 
+        private void OpenFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn &&
+               btn.Tag is string url)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+        }
+
         private async Task LoadUsers()
         {
             using var client = new HttpClient();
@@ -155,6 +169,43 @@ namespace ChatClient
                 _selectedFile = dialog.FileName;
 
                 MessageBox.Show($"Selected:\n{_selectedFile}");
+            }
+        }
+
+        private void Image_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Image img && img.DataContext is ChatMessage message)
+            {
+                if (!string.IsNullOrEmpty(message.FileUrl))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = message.FileUrl,
+                        UseShellExecute = true
+                    });
+                }
+            }
+        }
+
+        private async void Download_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is string url)
+            {
+                using HttpClient client = new();
+
+                var bytes = await client.GetByteArrayAsync(url);
+
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    FileName = Path.GetFileName(url)
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await File.WriteAllBytesAsync(dialog.FileName, bytes);
+
+                    MessageBox.Show("Downloaded!");
+                }
             }
         }
         private async void Login_Click(object sender, RoutedEventArgs e)

@@ -26,6 +26,8 @@ public class FilesController : ControllerBase
 
         await file.CopyToAsync(stream);
 
-        return Ok(fileName);
+        var url = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+
+        return Ok(url);
     }
 }
