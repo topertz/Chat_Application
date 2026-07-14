@@ -64,25 +64,25 @@
         <Border Grid.Row="0" Background="#2B2D31" CornerRadius="10" Padding="15" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="💬 Chat Client"
-                   FontSize="22"
-                   FontWeight="Bold"
-                   VerticalAlignment="Center"
-                   Margin="0,0,30,0"/>
+                FontSize="22"
+                FontWeight="Bold"
+                VerticalAlignment="Center"
+                Margin="0,0,30,0"/>
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="Username"
                     FontSize="12"
                     Margin="0,0,0,5"/>
                     <TextBox x:Name="UsernameBox"
-                     Width="180"
-                     Height="35"
-                     Margin="0,0,0,5"/>
+                    Width="180"
+                    Height="35"
+                    Margin="0,0,0,5"/>
                     <TextBlock Text="Password"
                     FontSize="12"
                     Margin="0,0,0,5"/>
                     <PasswordBox x:Name="PasswordBox"
-                         Width="180"
-                         Height="35"
-                         Margin="0,0,0,5"/>
+                    Width="180"
+                    Height="35"
+                    Margin="0,0,0,5"/>
                 </StackPanel>
                 <Button Content="Login"
                 Width="100"
@@ -110,20 +110,20 @@
                                     <StackPanel Orientation="Horizontal">
                                         <!-- Avatar -->
                                         <Ellipse Width="35"
-                                         Height="35"
-                                         Fill="#5865F2"
-                                         VerticalAlignment="Center"/>
+                                        Height="35"
+                                        Fill="#5865F2"
+                                        VerticalAlignment="Center"/>
                                         <!-- Online jel -->
                                         <Ellipse Width="10"
-                                         Height="10"
-                                         Fill="LimeGreen"
-                                         VerticalAlignment="Bottom"
-                                         Margin="-10,0,8,0"/>
+                                        Height="10"
+                                        Fill="LimeGreen"
+                                        VerticalAlignment="Bottom"
+                                        Margin="-10,0,8,0"/>
                                         <!-- Username -->
-                                       <TextBlock Text="{Binding Username}"
-                                       FontSize="15"
-                                       Margin="10,0,0,0"
-                                       VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Username}"
+                                        FontSize="15"
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -133,50 +133,50 @@
             </Border>
             <!-- CHAT -->
             <Border Grid.Column="2"
-        Background="#383A40"
-        CornerRadius="10"
-        Padding="10">
-                <DockPanel>
-                    <!-- Beszélgetés fejléc -->
-                    <Border DockPanel.Dock="Top"
+            Background="#383A40"
+            CornerRadius="10"
+            Padding="10">
+            <DockPanel>
+            <!-- Beszélgetés fejléc -->
+                <Border DockPanel.Dock="Top"
                 Background="#2B2D31"
                 Padding="12"
                 CornerRadius="8"
                 Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock
-                    x:Name="ChatTitle"
-                    FontSize="18"
-                    FontWeight="Bold"/>
+                            x:Name="ChatTitle"
+                            FontSize="18"
+                            FontWeight="Bold"/>
                             <TextBlock
-                    Text="Online"
-                    Foreground="LightGreen"/>
+                            Text="Online"
+                            Foreground="LightGreen"/>
                         </StackPanel>
                     </Border>
                     <!-- Üzenetek -->
                     <ListBox x:Name="MessagesList"
-                 Background="#383A40">
+                    Background="#383A40">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border
-                        Padding="10"
-                        Margin="5"
-                        CornerRadius="12"
-                        MaxWidth="350"
-                        Background="#444654">
+                                Padding="10"
+                                Margin="5"
+                                CornerRadius="12"
+                                MaxWidth="350"
+                                Background="#444654">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="HorizontalAlignment"
-                                        Value="Left"/>
+                                            Value="Left"/>
                                             <Setter Property="Background"
-                                        Value="#444654"/>
+                                            Value="#444654"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsMine}"
                                                  Value="True">
                                                     <Setter Property="HorizontalAlignment"
-                                                Value="Right"/>
+                                                    Value="Right"/>
                                                     <Setter Property="Background"
-                                                Value="#5865F2"/>
+                                                    Value="#5865F2"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -184,10 +184,11 @@
                                     <StackPanel Orientation="Horizontal">
                                         <!-- Profilkép -->
                                         <Ellipse Width="40"
-                                         Height="40"
-                                         Fill="#5865F2"
-                                         VerticalAlignment="Top"/>
-                                        <StackPanel Margin="10,0,0,0">
+                                        Height="40"
+                                        Fill="#5865F2"
+                                        VerticalAlignment="Top"/>
+                                        <StackPanel Margin="10,0,0,0"
+                                        VerticalAlignment="Top">
                                             <!-- Név -->
                                             <TextBlock Text="{Binding User}"
                                             FontWeight="Bold"/>
@@ -199,8 +200,9 @@
                                                 <!-- Kép megjelenítése -->
                                                 <Image Source="{Binding FileUrl}"
                                                 Width="200"
-                                                Height="200"
+                                                MaxHeight="200"
                                                 Stretch="Uniform"
+                                                VerticalAlignment="Top"
                                                 Visibility="{Binding IsImage, Converter={StaticResource BoolToVisibilityConverter}}"
                                                 MouseDown="Image_Click"/>
                                                 <Button Content="⬇ Download"
@@ -227,8 +229,8 @@
                                             </StackPanel>
                                             <!-- Idő -->
                                             <TextBlock Text="{Binding Time}"
-                                           FontSize="10"
-                                           HorizontalAlignment="Right"/>
+                                            FontSize="10"
+                                            HorizontalAlignment="Right"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -250,11 +252,11 @@
                 Tag="{Binding FileUrl}"
                 Click="Attach_Click"/>
                 <TextBox Grid.Column="1"
-             x:Name="MessageInput"
-             KeyDown="MessageInput_KeyDown"/>
+                x:Name="MessageInput"
+                KeyDown="MessageInput_KeyDown"/>
                 <Button Grid.Column="2"
-            Content="➤"
-            Click="Send_Click"/>
+                Content="➤"
+                Click="Send_Click"/>
             </Grid>
         </Border>
     </Grid>

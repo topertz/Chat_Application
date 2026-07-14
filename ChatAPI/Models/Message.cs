@@ -1,4 +1,4 @@
-namespace ChatAPI.Models; 
+namespace ChatAPI.Models;
 
 public class Message
 {

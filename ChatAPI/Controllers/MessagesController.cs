@@ -1,5 +1,4 @@
 using ChatAPI.Data;
-using ChatAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,5 +30,5 @@ public class MessagesController : ControllerBase
             })
             .ToListAsync();
         return Ok(messages);
-    }       
+    }
 }
