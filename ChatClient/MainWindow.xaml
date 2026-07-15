@@ -1,6 +1,6 @@
 ﻿<Window x:Class="ChatClient.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Chat App" Height="600" Width="850" Background="#313338">
     <Window.Resources>
-        <!-- Gomb -->
+        <!-- Button -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="#5865F2"/>
             <Setter Property="Foreground" Value="White"/>
@@ -26,7 +26,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
-        <!-- ListBox elem -->
+        <!-- ListBox item -->
         <Style TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Margin" Value="2"/>
@@ -113,7 +113,7 @@
                                         Height="35"
                                         Fill="#5865F2"
                                         VerticalAlignment="Center"/>
-                                        <!-- Online jel -->
+                                        <!-- Online sign -->
                                         <Ellipse Width="10"
                                         Height="10"
                                         Fill="LimeGreen"
@@ -137,7 +137,7 @@
             CornerRadius="10"
             Padding="10">
             <DockPanel>
-            <!-- Beszélgetés fejléc -->
+            <!-- Conversation header -->
                 <Border DockPanel.Dock="Top"
                 Background="#2B2D31"
                 Padding="12"
@@ -153,7 +153,7 @@
                             Foreground="LightGreen"/>
                         </StackPanel>
                     </Border>
-                    <!-- Üzenetek -->
+                    <!-- Messages -->
                     <ListBox x:Name="MessagesList"
                     Background="#383A40">
                         <ListBox.ItemTemplate>
@@ -182,22 +182,22 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel Orientation="Horizontal">
-                                        <!-- Profilkép -->
+                                        <!-- Profile picture -->
                                         <Ellipse Width="40"
                                         Height="40"
                                         Fill="#5865F2"
                                         VerticalAlignment="Top"/>
                                         <StackPanel Margin="10,0,0,0"
                                         VerticalAlignment="Top">
-                                            <!-- Név -->
+                                            <!-- Name -->
                                             <TextBlock Text="{Binding User}"
                                             FontWeight="Bold"/>
-                                            <!-- Üzenet -->
+                                            <!-- Message -->
                                             <TextBlock Text="{Binding Text}"
                                             TextWrapping="Wrap"/>
-                                            <!-- Csatolmány -->
+                                            <!-- Attachment -->
                                             <StackPanel Margin="0,5,0,0">
-                                                <!-- Kép megjelenítése -->
+                                                <!-- Display image -->
                                                 <Image Source="{Binding FileUrl}"
                                                 Width="200"
                                                 MaxHeight="200"
@@ -209,7 +209,7 @@
                                                 Tag="{Binding FileUrl}"
                                                 Click="Download_Click"
                                                 Visibility="{Binding IsImage, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                                <!-- Nem kép fájl esetén link -->
+                                                <!-- For non-image files, link -->
                                                 <TextBlock Text="{Binding FileUrl}"
                                                 TextWrapping="Wrap"
                                                 Foreground="LightBlue"
@@ -227,7 +227,7 @@
                                                     </TextBlock.Style>
                                                 </TextBlock>
                                             </StackPanel>
-                                            <!-- Idő -->
+                                            <!-- Time -->
                                             <TextBlock Text="{Binding Time}"
                                             FontSize="10"
                                             HorizontalAlignment="Right"/>
