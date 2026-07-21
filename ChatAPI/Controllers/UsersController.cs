@@ -1,5 +1,6 @@
 using ChatAPI.Data;
 using ChatAPI.Models;
+using ChatAPI.Services;
 using ChatAPI.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +12,12 @@ namespace ChatAPI.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly ChatDbContext _context;
-    public UsersController(ChatDbContext context)
+    private readonly JwtService _jwtService;
+    public UsersController(ChatDbContext context, JwtService jwtService)
     {
         _context = context;
+        _jwtService = jwtService;
+
     }
 
     [HttpGet]
@@ -42,6 +46,8 @@ public class UsersController : ControllerBase
 
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Username == dto.Username);
+
+
         if (user == null)
         {
             user = new User
@@ -52,13 +58,21 @@ public class UsersController : ControllerBase
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-
-            return Ok(user);
         }
-        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+        else
         {
-            return Unauthorized("Wrong password");
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+            {
+                return Unauthorized("Wrong password");
+            }
         }
-        return Ok(user);
+
+        var token = _jwtService.CreateToken(user.Username);
+
+        return Ok(new
+        {
+            token,
+            username = user.Username
+        });
     }
 }

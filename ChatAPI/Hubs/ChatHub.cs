@@ -3,9 +3,12 @@ using ChatAPI.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ChatAPI.Hubs;
 
+[Authorize]
 public class ChatHub : Hub
 {
     private readonly ChatDbContext _context;
@@ -16,8 +19,15 @@ public class ChatHub : Hub
         _context = context;
     }
 
-    public async Task Register(string username)
+    public async Task Register()
     {
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+
+        if (string.IsNullOrEmpty(username))
+        {
+            throw new HubException("User not authenticated");
+        }
+
         _users[username] = Context.ConnectionId;
 
         await Clients.Caller.SendAsync(
@@ -31,19 +41,35 @@ public class ChatHub : Hub
         );
     }
 
-    public async Task SendMessage(string fromUser, string toUser, string text, string? file)
+    public async Task SendMessage(
+    string toUser,
+    string text,
+    string? file)
     {
+        var fromUser = Context.User?
+            .FindFirst(ClaimTypes.Name)?
+            .Value;
+
+
+        if (string.IsNullOrEmpty(fromUser))
+        {
+            throw new HubException("User not authenticated");
+        }
+
+
         var sender = await _context.Users
             .FirstOrDefaultAsync(x => x.Username == fromUser);
 
         if (sender == null)
             throw new Exception("Sender not found.");
 
+
         var receiver = await _context.Users
             .FirstOrDefaultAsync(x => x.Username == toUser);
 
         if (receiver == null)
             throw new Exception("Receiver not found.");
+
 
         var message = new Message
         {
@@ -54,24 +80,31 @@ public class ChatHub : Hub
             FileUrl = file
         };
 
+
         _context.Messages.Add(message);
+
         await _context.SaveChangesAsync();
 
+
         var time = message.SentAt.ToString("HH:mm");
+
 
         await SendToUser(
             toUser,
             fromUser,
             text,
             time,
-            file);
+            file
+        );
+
 
         await SendToUser(
             fromUser,
             fromUser,
             text,
             time,
-            file);
+            file
+        );
     }
 
     private async Task SendToUser(

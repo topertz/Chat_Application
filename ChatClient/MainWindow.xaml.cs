@@ -1,4 +1,5 @@
-﻿using ChatAPI.Models;
+﻿using ChatShared.Models;
+using ChatClient.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
 using System.Diagnostics;
@@ -19,6 +20,7 @@ namespace ChatClient
         private string _username = "";
         private string? _selectedUser;
         private string? _selectedFile;
+        private string _token = "";
         private HashSet<string> _onlineUsers = new();
         public MainWindow()
         {
@@ -26,6 +28,11 @@ namespace ChatClient
             _connection = new HubConnectionBuilder()
             .WithUrl("http://localhost:5090/chatHub", options =>
             {
+                options.AccessTokenProvider = () =>
+                {
+                    return Task.FromResult(_token);
+                };
+
                 options.HttpMessageHandlerFactory = _ =>
                 {
                     return new HttpClientHandler
@@ -311,11 +318,24 @@ namespace ChatClient
                     MessageBox.Show(error);
                     return;
                 }
+
+                var loginResult =
+                await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+                if (loginResult == null)
+                {
+                    MessageBox.Show("Invalid login response");
+                    return;
+                }
+
+                _token = loginResult.Token;
+                _username = loginResult.Username;
+
                 if (_connection.State == HubConnectionState.Disconnected)
                 {
                     await _connection.StartAsync();
                 }
-                await _connection.InvokeAsync("Register", _username);
+                await _connection.InvokeAsync("Register");
                 await LoadUsers();
 
                 MessageBox.Show("Connected!");
@@ -370,7 +390,6 @@ namespace ChatClient
 
             await _connection.SendAsync(
                 "SendMessage",
-                _username,
                 _selectedUser,
                 MessageInput.Text,
                 uploadedFile

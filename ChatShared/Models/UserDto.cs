@@ -1,4 +1,4 @@
-namespace ChatAPI.Models;
+namespace ChatShared.Models;
 public class UserDto
 {
     public int Id { get; set; }
