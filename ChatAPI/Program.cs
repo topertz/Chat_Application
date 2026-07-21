@@ -47,8 +47,6 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.UseStaticFiles();
-
 var uploadPath = Path.Combine(
     builder.Environment.ContentRootPath,
     "Uploads"
