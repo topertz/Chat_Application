@@ -1,7 +1,7 @@
 using ChatAPI.Data;
 using ChatAPI.Models;
 using ChatAPI.Services;
-using ChatAPI.Validators;
+using ChatShared.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

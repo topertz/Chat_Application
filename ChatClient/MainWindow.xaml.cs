@@ -1,4 +1,5 @@
-﻿using ChatShared.Models;
+﻿using ChatShared.Validators;
+using ChatShared.Models;
 using ChatClient.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
@@ -6,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,7 +20,7 @@ namespace ChatClient
         private string _username = "";
         private string? _selectedUser;
         private string? _selectedFile;
-        private string _token = "";
+        private string? _token;
         private HashSet<string> _onlineUsers = new();
         public MainWindow()
         {
@@ -226,14 +226,6 @@ namespace ChatClient
             }
         }
 
-        private bool ValidatePassword(string password)
-        {
-            return Regex.IsMatch(
-                password,
-                @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$"
-            );
-        }
-
         private void Attach_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -263,28 +255,43 @@ namespace ChatClient
 
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is string url)
+            try
             {
-                using HttpClient client = new();
-
-                var bytes = await client.GetByteArrayAsync(url);
-
-                SaveFileDialog dialog = new SaveFileDialog
+                if (sender is Button btn && btn.Tag is string url)
                 {
-                    FileName = Path.GetFileName(url)
-                };
+                    using HttpClient client = new();
 
-                if (dialog.ShowDialog() == true)
-                {
-                    await File.WriteAllBytesAsync(dialog.FileName, bytes);
+                    var bytes = await client.GetByteArrayAsync(url);
 
-                    MessageBox.Show("Downloaded!");
+                    SaveFileDialog dialog = new SaveFileDialog
+                    {
+                        FileName = Path.GetFileName(url)
+                    };
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        await File.WriteAllBytesAsync(dialog.FileName, bytes);
+
+                        MessageBox.Show("Downloaded!");
+                    }
                 }
+            }
+            catch (HttpRequestException)
+            {
+                MessageBox.Show(
+                    "Server is unavailable. Check your connection."
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Download failed: " + ex.Message
+                );
             }
         }
         private async void Login_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidatePassword(PasswordBox.Password))
+            if (!PasswordValidator.IsValid(PasswordBox.Password))
             {
                 MessageBox.Show(
                     "Password must contain at least 8 characters, uppercase, lowercase, number and special character!"
@@ -348,56 +355,71 @@ namespace ChatClient
 
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
-            string? uploadedFile = null;
-
-            if (!string.IsNullOrEmpty(_selectedFile))
+            try
             {
-                using var client = new HttpClient();
+                string? uploadedFile = null;
 
-                using var content = new MultipartFormDataContent();
+                if (!string.IsNullOrEmpty(_selectedFile))
+                {
+                    using var client = new HttpClient();
 
-                using var stream = File.OpenRead(_selectedFile);
+                    using var content = new MultipartFormDataContent();
 
-                var fileContent = new StreamContent(stream);
+                    using var stream = File.OpenRead(_selectedFile);
 
-                content.Add(fileContent, "file", Path.GetFileName(_selectedFile));
+                    var fileContent = new StreamContent(stream);
 
-                var response = await client.PostAsync(
-                    "http://localhost:5090/api/files/upload",
-                    content);
+                    content.Add(fileContent, "file", Path.GetFileName(_selectedFile));
 
-                uploadedFile = await response.Content.ReadAsStringAsync();
+                    var response = await client.PostAsync(
+                        "http://localhost:5090/api/files/upload",
+                        content);
 
-                _selectedFile = null;
+                    uploadedFile = await response.Content.ReadAsStringAsync();
+
+                    _selectedFile = null;
+                }
+                if (_connection.State != HubConnectionState.Connected)
+                {
+                    MessageBox.Show("No connection!");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(_selectedUser))
+                {
+                    MessageBox.Show("Select a user first!");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(MessageInput.Text) &&
+                    string.IsNullOrWhiteSpace(uploadedFile))
+                {
+                    return;
+                }
+
+                await _connection.SendAsync(
+                    "SendMessage",
+                    _selectedUser,
+                    MessageInput.Text,
+                    uploadedFile
+                );
+
+                await LoadMessages(_selectedUser);
+
+                MessageInput.Text = "";
             }
-            if (_connection.State != HubConnectionState.Connected)
+            catch (HttpRequestException)
             {
-                MessageBox.Show("No connection!");
-                return;
+                MessageBox.Show(
+                    "Server is unavailable. Check your connection."
+                );
             }
-
-            if (string.IsNullOrWhiteSpace(_selectedUser))
+            catch (Exception ex)
             {
-                MessageBox.Show("Select a user first!");
-                return;
+                MessageBox.Show(
+                    "Sending message failed: " + ex.Message
+                );
             }
-
-            if (string.IsNullOrWhiteSpace(MessageInput.Text) &&
-                string.IsNullOrWhiteSpace(uploadedFile))
-            {
-                return;
-            }
-
-            await _connection.SendAsync(
-                "SendMessage",
-                _selectedUser,
-                MessageInput.Text,
-                uploadedFile
-            );
-
-            await LoadMessages(_selectedUser);
-
-            MessageInput.Text = "";
         }
     }
 }

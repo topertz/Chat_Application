@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace ChatAPI.Validators;
-
+namespace ChatShared.Validators;
 public static class PasswordValidator
 {
     private static readonly Regex PasswordRegex =
