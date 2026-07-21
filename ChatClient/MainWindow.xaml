@@ -102,7 +102,7 @@
             <!-- USERS -->
             <Border Grid.Column="0" Background="#2B2D31" CornerRadius="10" Padding="10">
                 <StackPanel>
-                    <TextBlock Text="Online users" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Users" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                     <ListBox x:Name="UsersList" Background="#2B2D31" SelectionChanged="UsersList_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -116,9 +116,21 @@
                                         <!-- Online sign -->
                                         <Ellipse Width="10"
                                         Height="10"
-                                        Fill="LimeGreen"
-                                        VerticalAlignment="Bottom"
-                                        Margin="-10,0,8,0"/>
+                                        Margin="-10,0,8,0"
+                                        VerticalAlignment="Bottom">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="Gray"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOnline}"
+                                                        Value="True">
+                                                            <Setter Property="Fill"
+                                                        Value="LimeGreen"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
                                         <!-- Username -->
                                         <TextBlock Text="{Binding Username}"
                                         FontSize="15"
@@ -148,9 +160,9 @@
                             x:Name="ChatTitle"
                             FontSize="18"
                             FontWeight="Bold"/>
-                            <TextBlock
-                            Text="Online"
-                            Foreground="LightGreen"/>
+                            <TextBlock x:Name="OnlineStatusText"
+                            Text="Offline"
+                            Foreground="Gray"/>
                         </StackPanel>
                     </Border>
                     <!-- Messages -->
@@ -190,7 +202,7 @@
                                         <StackPanel Margin="10,0,0,0"
                                         VerticalAlignment="Top">
                                             <!-- Name -->
-                                            <TextBlock Text="{Binding User}"
+                                            <TextBlock Text="{Binding Sender}"
                                             FontWeight="Bold"/>
                                             <!-- Message -->
                                             <TextBlock Text="{Binding Text}"

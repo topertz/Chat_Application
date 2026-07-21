@@ -16,27 +16,40 @@ public class ChatHub : Hub
         _context = context;
     }
 
-    public Task Register(string username)
+    public async Task Register(string username)
     {
         _users[username] = Context.ConnectionId;
-        return Task.CompletedTask;
+
+        await Clients.Caller.SendAsync(
+            "OnlineUsers",
+            _users.Keys.ToList()
+        );
+
+        await Clients.All.SendAsync(
+            "UserConnected",
+            username
+        );
     }
 
     public async Task SendMessage(string fromUser, string toUser, string text, string? file)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == fromUser);
+        var sender = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == fromUser);
 
-        if (user == null)
-        {
-            user = new User { Username = fromUser };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-        }
+        if (sender == null)
+            throw new Exception("Sender not found.");
+
+        var receiver = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == toUser);
+
+        if (receiver == null)
+            throw new Exception("Receiver not found.");
 
         var message = new Message
         {
+            SenderId = sender.Id,
+            ReceiverId = receiver.Id,
             Text = text,
-            UserId = user.Id,
             SentAt = DateTime.UtcNow,
             FileUrl = file
         };
@@ -89,6 +102,11 @@ public class ChatHub : Hub
         if (!string.IsNullOrEmpty(user.Key))
         {
             _users.TryRemove(user.Key, out _);
+
+            await Clients.All.SendAsync(
+                "UserDisconnected",
+                user.Key
+           );
         }
 
         await base.OnDisconnectedAsync(exception);

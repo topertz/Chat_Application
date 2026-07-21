@@ -21,8 +21,16 @@ public class ChatDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<Message>()
-            .HasOne(m => m.User)
-            .WithMany(u => u.Messages)
-            .HasForeignKey(m => m.UserId);
+            .HasOne(m => m.Sender)
+            .WithMany(u => u.SentMessages)
+            .HasForeignKey(m => m.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Receiver)
+            .WithMany(u => u.ReceivedMessages)
+            .HasForeignKey(m => m.ReceiverId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

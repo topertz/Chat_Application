@@ -15,16 +15,25 @@ public class MessagesController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetMessages()
+    [HttpGet("{user1}/{user2}")]
+    public async Task<IActionResult> GetMessages(string user1, string user2)
     {
         var messages = await _context.Messages
-            .Include(m => m.User)
+            .Include(m => m.Sender)
+            .Include(m => m.Receiver)
+            .Where(m =>
+                (m.Sender!.Username == user1 && 
+                m.Receiver!.Username == user2)
+                ||
+                (m.Sender!.Username == user2 &&
+                m.Receiver!.Username == user1)
+            )
             .OrderBy(m => m.SentAt)
             .Select(m => new
             {
                 m.Id,
-                Username = m.User!.Username,
+                Sender = m.Sender!.Username,
+                Receiver = m.Receiver!.Username,
                 m.Text,
                 m.SentAt
             })

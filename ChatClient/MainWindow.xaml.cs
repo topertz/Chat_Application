@@ -1,5 +1,4 @@
 ﻿using ChatAPI.Models;
-using ChatClient.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ChatClient
 {
@@ -19,7 +19,7 @@ namespace ChatClient
         private string _username = "";
         private string? _selectedUser;
         private string? _selectedFile;
-        private Dictionary<string, ChatConversation> _conversations = new();
+        private HashSet<string> _onlineUsers = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -37,37 +37,64 @@ namespace ChatClient
             })
             .WithAutomaticReconnect()
             .Build();
-            _connection.On<string, string, string, string?>("ReceiveMessage",
+            _connection.On<string, string, string, string?>(
+            "ReceiveMessage",
             (user, message, time, file) =>
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.Invoke(async () =>
                 {
-                    if (!_conversations.ContainsKey(user))
-                    {
-                        _conversations[user] = new ChatConversation
-                        {
-                            Username = user
-                        };
-                    }
-
-                    _conversations[user].Messages.Add(
-                        new ChatMessage
-                        {
-                            User = user,
-                            Text = message,
-                            Time = time,
-                            IsMine = user == _username,
-                            FileUrl = file
-                        });
-
                     if (_selectedUser == user)
                     {
-                        MessagesList.ItemsSource =
-                            _conversations[user].Messages;
-
-                        MessagesList.ScrollIntoView(
-                            MessagesList.Items[MessagesList.Items.Count - 1]);
+                        await LoadMessages(user);
                     }
+                });
+            });
+            _connection.On<string>(
+            "UserConnected",
+            async (username) =>
+            {
+                await Dispatcher.Invoke(async () =>
+                {
+                    _onlineUsers.Add(username);
+
+                    if (_selectedUser == username)
+                    {
+                        OnlineStatusText.Text = "Online";
+                        OnlineStatusText.Foreground = Brushes.LimeGreen;
+                    }
+
+                    await LoadUsers();
+                });
+            });
+
+
+            _connection.On<string>(
+            "UserDisconnected",
+            async (username) =>
+            {
+                await Dispatcher.Invoke(async () =>
+                {
+                    _onlineUsers.Remove(username);
+
+                    if (_selectedUser == username)
+                    {
+                        OnlineStatusText.Text = "Offline";
+                        OnlineStatusText.Foreground = Brushes.Gray;
+                    }
+
+                    await LoadUsers();
+                });
+            });
+
+            _connection.On<List<string>>(
+            "OnlineUsers",
+            (users) =>
+            {
+                Dispatcher.Invoke(async () =>
+                {
+                    _onlineUsers = users.ToHashSet();
+
+                    await LoadUsers();
                 });
             });
         }
@@ -117,13 +144,57 @@ namespace ChatClient
         {
             using var client = new HttpClient();
 
-            var users = await client.GetFromJsonAsync<List<UserDto>>("http://localhost:5090/api/users");
+            var users = await client.GetFromJsonAsync<List<UserDto>>("http://localhost:5090/api/users")
+                ?? new List<UserDto>();
+
+            foreach(var user in users)
+            {
+                user.IsOnline = _onlineUsers.Contains(user.Username);
+            }
 
             UsersList.ItemsSource = null;
             UsersList.ItemsSource = users;
         }
 
-        private void UsersList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async Task LoadMessages(string otherUser)
+        {
+            try
+            {
+                using var client = new HttpClient();
+
+                var messages =
+                    await client.GetFromJsonAsync<List<MessageDto>>(
+                        $"http://localhost:5090/api/messages/{_username}/{otherUser}"
+                    );
+
+
+                if (messages == null)
+                    return;
+
+
+                foreach (var msg in messages)
+                {
+                    msg.IsMine = msg.Sender == _username;
+                }
+
+
+                MessagesList.ItemsSource = messages;
+
+
+                if (MessagesList.Items.Count > 0)
+                {
+                    MessagesList.ScrollIntoView(
+                        MessagesList.Items[MessagesList.Items.Count - 1]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Loading messages failed: " + ex.Message);
+            }
+        }
+
+        private async void UsersList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (UsersList.SelectedItem is UserDto user)
             {
@@ -131,17 +202,20 @@ namespace ChatClient
 
                 ChatTitle.Text = user.Username;
 
-                if (!_conversations.ContainsKey(user.Username))
+
+                if (user.IsOnline)
                 {
-                    _conversations[user.Username] = new ChatConversation
-                    {
-                        Username = user.Username
-                    };
+                    OnlineStatusText.Text = "Online";
+                    OnlineStatusText.Foreground = Brushes.LimeGreen;
+                }
+                else
+                {
+                    OnlineStatusText.Text = "Offline";
+                    OnlineStatusText.Foreground = Brushes.Gray;
                 }
 
 
-                MessagesList.ItemsSource =
-                    _conversations[user.Username].Messages;
+                await LoadMessages(user.Username);
             }
         }
 
@@ -167,7 +241,7 @@ namespace ChatClient
 
         private void Image_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Image img && img.DataContext is ChatMessage message)
+            if (sender is Image img && img.DataContext is MessageDto message)
             {
                 if (!string.IsNullOrEmpty(message.FileUrl))
                 {
@@ -301,6 +375,8 @@ namespace ChatClient
                 MessageInput.Text,
                 uploadedFile
             );
+
+            await LoadMessages(_selectedUser);
 
             MessageInput.Text = "";
         }
