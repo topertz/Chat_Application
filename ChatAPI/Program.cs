@@ -61,10 +61,20 @@ builder.Services
             {
                 var token = context.Request.Query["access_token"];
 
+                Console.WriteLine("SIGNALR TOKEN:");
+                Console.WriteLine(token);
+
                 if (!string.IsNullOrEmpty(token))
                 {
                     context.Token = token;
                 }
+
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("JWT ERROR:");
+                Console.WriteLine(context.Exception.Message);
 
                 return Task.CompletedTask;
             }
@@ -86,7 +96,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

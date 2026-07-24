@@ -30,6 +30,7 @@ namespace ChatClient
             {
                 options.AccessTokenProvider = () =>
                 {
+                    Console.WriteLine("TOKEN SEND: " + _token);
                     return Task.FromResult(_token);
                 };
 
@@ -326,8 +327,12 @@ namespace ChatClient
                     return;
                 }
 
+                var raw = await response.Content.ReadAsStringAsync();
+
+                MessageBox.Show(raw);
+
                 var loginResult =
-                await response.Content.ReadFromJsonAsync<LoginResponse>();
+                    System.Text.Json.JsonSerializer.Deserialize<LoginResponse>(raw);
 
                 if (loginResult == null)
                 {
@@ -337,6 +342,10 @@ namespace ChatClient
 
                 _token = loginResult.Token;
                 _username = loginResult.Username;
+
+                MessageBox.Show(
+                    $"TOKEN LENGTH: {_token.Length}"
+                );
 
                 if (_connection.State == HubConnectionState.Disconnected)
                 {

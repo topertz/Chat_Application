@@ -16,7 +16,7 @@ public class MessagesController : ControllerBase
     }
 
     [HttpGet("{user1}/{user2}")]
-    public async Task<IActionResult> GetMessages(string user1, string user2)
+    public async Task<IActionResult> GetMessages(string user1, string user2, int page = 1, int pageSize = 50)
     {
         var messages = await _context.Messages
             .Include(m => m.Sender)
@@ -29,13 +29,16 @@ public class MessagesController : ControllerBase
                 m.Receiver!.Username == user1)
             )
             .OrderBy(m => m.SentAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(m => new
             {
                 m.Id,
                 Sender = m.Sender!.Username,
                 Receiver = m.Receiver!.Username,
                 m.Text,
-                m.SentAt
+                m.SentAt,
+                m.FileUrl
             })
             .ToListAsync();
         return Ok(messages);
