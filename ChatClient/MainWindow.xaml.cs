@@ -17,7 +17,7 @@ namespace ChatClient
 {
     public partial class MainWindow : Window
     {
-        private HubConnection _connection;
+        private HubConnection? _connection;
         private string _username = "";
         private string? _selectedUser;
         private string? _selectedFile;
@@ -26,6 +26,9 @@ namespace ChatClient
         public MainWindow()
         {
             InitializeComponent();
+        }
+        private void CreateConnection()
+        {
             _connection = new HubConnectionBuilder()
             .WithUrl("http://localhost:5090/chatHub", options =>
             {
@@ -344,10 +347,15 @@ namespace ChatClient
                 _token = loginResult.Token;
                 _username = loginResult.Username;
 
-                if (_connection.State == HubConnectionState.Disconnected)
+                CreateConnection();
+
+                if (_connection == null)
                 {
-                    await _connection.StartAsync();
+                    MessageBox.Show("No connection created!");
+                    return;
                 }
+                await _connection.StartAsync();
+                
                 await _connection.InvokeAsync("Register");
                 await LoadUsers();
 
@@ -385,7 +393,7 @@ namespace ChatClient
 
                     _selectedFile = null;
                 }
-                if (_connection.State != HubConnectionState.Connected)
+                if (_connection == null || _connection.State != HubConnectionState.Connected)
                 {
                     MessageBox.Show("No connection!");
                     return;
