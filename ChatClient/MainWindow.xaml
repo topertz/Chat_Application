@@ -220,7 +220,7 @@
                                                 <Button Content="⬇ Download"
                                                 Tag="{Binding FileUrl}"
                                                 Click="Download_Click"
-                                                Visibility="{Binding IsImage, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                Visibility="{Binding HasFile, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                                 <!-- For non-image files, link -->
                                                 <TextBlock Text="{Binding FileUrl}"
                                                 TextWrapping="Wrap"
@@ -231,9 +231,13 @@
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsImage}" Value="False">
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding HasFile}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsImage}" Value="False"/>
+                                                                    </MultiDataTrigger.Conditions>
                                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
+                                                                </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>

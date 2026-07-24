@@ -61,12 +61,21 @@ builder.Services
             {
                 var token = context.Request.Query["access_token"];
 
-                Console.WriteLine("SIGNALR TOKEN:");
-                Console.WriteLine(token);
-
                 if (!string.IsNullOrEmpty(token))
                 {
                     context.Token = token;
+                }
+
+                if (string.IsNullOrEmpty(context.Token))
+                {
+                    var authHeader = context.Request.Headers["Authorization"]
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(authHeader) &&
+                        authHeader.StartsWith("Bearer "))
+                    {
+                        context.Token = authHeader.Substring("Bearer ".Length);
+                    }
                 }
 
                 return Task.CompletedTask;
